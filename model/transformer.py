@@ -2,7 +2,10 @@
 import torch
 import torch.nn as nn
 
-from config import ModelConfig
+try:
+    from model.config import ModelConfig
+except ImportError:
+    from config import ModelConfig
 
 
 class TransformerBlock(nn.Module):

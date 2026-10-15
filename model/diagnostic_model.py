@@ -9,9 +9,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from config import ModelConfig
-from transformer import FarmWiseTransformer
-from knowledge_base import AgriculturalKnowledgeBase, DiseaseAdvisory
+try:
+    from model.config import ModelConfig
+    from model.transformer import FarmWiseTransformer
+    from model.knowledge_base import AgriculturalKnowledgeBase, DiseaseAdvisory
+except ImportError:
+    from config import ModelConfig
+    from transformer import FarmWiseTransformer
+    from knowledge_base import AgriculturalKnowledgeBase, DiseaseAdvisory
 
 
 CROPS = ["Tomato", "Wheat", "Rice", "Potato", "Cotton", "Other"]
@@ -153,3 +158,4 @@ class FarmWiseDiagnosticClassifier(nn.Module):
         }
 
         return result
+

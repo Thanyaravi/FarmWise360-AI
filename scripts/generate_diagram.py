@@ -203,3 +203,4 @@ plt.close()
 print(f"Diagram successfully generated:")
 print(f"PNG: {PNG_OUTPUT}")
 print(f"SVG: {SVG_OUTPUT}")
+

@@ -183,3 +183,4 @@ class AgriculturalKnowledgeBase:
                 list({adv.condition for adv in self._database.values() if adv.crop.lower() == crop.lower()})
             )
         return sorted(list({adv.condition for adv in self._database.values()}))
+

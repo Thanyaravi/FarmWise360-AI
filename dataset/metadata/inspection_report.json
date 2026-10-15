@@ -1,0 +1,22 @@
+{
+  "total_files": 3,
+  "usable_candidates": 3,
+  "empty_or_short_files": 0,
+  "documents": [
+    {
+      "file": "rice_advisories.txt",
+      "characters": 1610,
+      "usable_candidate": true
+    },
+    {
+      "file": "tomato_advisories.txt",
+      "characters": 1674,
+      "usable_candidate": true
+    },
+    {
+      "file": "wheat_advisories.txt",
+      "characters": 1459,
+      "usable_candidate": true
+    }
+  ]
+}

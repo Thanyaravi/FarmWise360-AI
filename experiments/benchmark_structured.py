@@ -65,3 +65,4 @@ def benchmark_cpu(iterations: int = 50):
 
 if __name__ == "__main__":
     benchmark_cpu(50)
+
