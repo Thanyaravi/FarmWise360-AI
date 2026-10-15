@@ -7,27 +7,20 @@ from typing import List, Optional
 import sys
 from pathlib import Path
 import torch
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-# Ensure project root and model directory are on sys.path
+# Ensure project root is in sys.path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-MODEL_DIR = ROOT_DIR / "model"
-if str(MODEL_DIR) not in sys.path:
-    sys.path.insert(0, str(MODEL_DIR))
-
-try:
-    from model.config import ModelConfig
-    from model.diagnostic_model import FarmWiseDiagnosticClassifier
-    from model.knowledge_base import AgriculturalKnowledgeBase
-except ImportError:
-    from config import ModelConfig
-    from diagnostic_model import FarmWiseDiagnosticClassifier
-    from knowledge_base import AgriculturalKnowledgeBase
+# Standard package imports resolved by VS Code and Python
+from model.config import ModelConfig
+from model.diagnostic_model import FarmWiseDiagnosticClassifier
+from model.knowledge_base import AgriculturalKnowledgeBase
 
 
 app = FastAPI(
@@ -132,7 +125,6 @@ def search_advisory(request: SearchRequest):
 
 
 if __name__ == "__main__":
-    import uvicorn
     print("=" * 60)
     print("Starting FarmWise 360 AI Diagnostic API Server")
     print("Access API Docs at: http://127.0.0.1:8000/docs")
