@@ -84,7 +84,7 @@ class FarmWiseTransformer(nn.Module):
         # Share input and output token embeddings.
         self.lm_head.weight = self.token_embedding.weight
 
-    def forward(self, input_ids):
+    def forward(self, input_ids, return_features: bool = False):
         batch_size, seq_len = input_ids.shape
 
         if seq_len > self.config.max_seq_len:
@@ -104,4 +104,12 @@ class FarmWiseTransformer(nn.Module):
 
         x = self.final_norm(x)
 
+        if return_features:
+            return x
+
         return self.lm_head(x)
+
+    def encode(self, input_ids):
+        """Extract sequence token representations before the LM head."""
+        return self.forward(input_ids, return_features=True)
+
