@@ -21,12 +21,13 @@ if str(ROOT_DIR) not in sys.path:
 from model.config import ModelConfig
 from model.diagnostic_model import FarmWiseDiagnosticClassifier
 from model.knowledge_base import AgriculturalKnowledgeBase
+from model.context_advisory import ContextAdvisoryEngine
 
 
 app = FastAPI(
     title="FarmWise 360 AI - Edge Diagnostic Engine",
-    description="Zero-hallucination lightweight agricultural diagnostic & advisory API.",
-    version="2.0.0",
+    description="Context-aware zero-hallucination agricultural diagnostic & advisory API.",
+    version="2.1.0",
 )
 
 app.add_middleware(
@@ -37,16 +38,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global model and knowledge base state
+# Global model, knowledge base, and semantic context engine
 config = ModelConfig()
 knowledge_base = AgriculturalKnowledgeBase()
 model = FarmWiseDiagnosticClassifier(config, knowledge_base=knowledge_base)
 model.eval()
+context_engine = ContextAdvisoryEngine(config=config)
 
 
 class DiagnosisRequest(BaseModel):
     symptoms: str = Field(..., description="Description of crop symptoms (e.g., 'brown target spots on lower tomato leaves')")
     input_ids: Optional[List[int]] = Field(None, description="Optional pre-tokenized token IDs (length <= 128)")
+
+
+class AskRequest(BaseModel):
+    question: str = Field(..., description="Natural language question in farmer's own words")
 
 
 class SearchRequest(BaseModel):
@@ -106,6 +112,16 @@ def diagnose_crop_issue(request: DiagnosisRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Diagnostic error: {str(e)}")
+
+
+@app.post("/ask")
+def answer_farmer_question(request: AskRequest):
+    if not request.question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty.")
+    try:
+        return context_engine.answer_query(request.question)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
 
 
 @app.post("/advisory/search")

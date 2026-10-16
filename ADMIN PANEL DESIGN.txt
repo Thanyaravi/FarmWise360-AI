@@ -1,0 +1,7 @@
+ADMIN PANEL DESIGN:
+
+
+logins and logouts, controls(only we can manipulate them), logical resoning, user bases(enquires based on general convo, using ai, recommendations, advisories like wt can be groen, financial adviceries to grop a crop), reports of operations(daily, monthly n weekly reports), stats(data visualizations), 
+
+
+backend database
