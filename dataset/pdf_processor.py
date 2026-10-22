@@ -128,3 +128,4 @@ def process_all_documents(input_dir: Optional[Path] = None) -> List[Dict[str, An
 
 if __name__ == "__main__":
     process_all_documents()
+

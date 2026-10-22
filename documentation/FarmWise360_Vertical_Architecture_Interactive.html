@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmWise360-AI System Architecture - Vertical Block Diagram</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0B1120; color: #F8FAFC; display: flex; height: 100vh; overflow: hidden; }
+    
+    /* Left Canvas: Flowchart Column */
+    .flowchart-container {
+      flex: 1; overflow-y: auto; padding: 40px 20px; display: flex; flex-direction: column; align-items: center;
+    }
+    .flowchart-title { text-align: center; margin-bottom: 30px; }
+    .flowchart-title h1 { font-size: 22px; color: #38BDF8; font-weight: 700; }
+    .flowchart-title p { font-size: 13px; color: #94A3B8; margin-top: 4px; }
+
+    .block-card {
+      width: 580px; background: #1E293B; border: 1.5px solid #334155; border-radius: 12px;
+      padding: 20px; cursor: pointer; transition: all 0.2s ease; position: relative;
+    }
+    .block-card:hover { border-color: #38BDF8; transform: scale(1.01); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+    .block-card.active { border-color: #38BDF8; background: #132A4A; box-shadow: 0 0 0 2px #38BDF8; }
+
+    .card-header {
+      font-size: 13.5px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 14px;
+      display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px;
+    }
+    .tag-blue { color: #60A5FA; }
+    .tag-purple { color: #C084FC; }
+    .tag-green { color: #4ADE80; }
+    .tag-orange { color: #FB923C; }
+    .tag-red { color: #F87171; }
+    .tag-cyan { color: #22D3EE; }
+    .tag-emerald { color: #34D399; }
+
+    .step-item {
+      background: #0F172A; border: 1px solid #334155; border-radius: 6px; padding: 9px 14px;
+      font-size: 12.5px; text-align: center; color: #E2E8F0; margin: 6px 0;
+    }
+    .step-list { list-style: none; font-size: 12.5px; color: #CBD5E1; line-height: 1.7; padding-left: 6px; }
+    .step-list li { position: relative; padding-left: 14px; }
+    .step-list li::before { content: "•"; position: absolute; left: 0; color: #38BDF8; font-weight: bold; }
+
+    /* Arrows connecting blocks */
+    .flow-arrow {
+      height: 32px; display: flex; justify-content: center; align-items: center; color: #64748B; font-size: 18px; font-weight: bold;
+    }
+
+    /* Decision Diamond in Stage 6 */
+    .decision-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+    .decision-branch {
+      background: #0F172A; border-radius: 8px; padding: 10px; font-size: 11.5px; text-align: center;
+    }
+    .branch-yes { border: 1px solid #16A34A; color: #86EFAC; }
+    .branch-no { border: 1px solid #E11D48; color: #FDA4AF; }
+
+    .final-badge {
+      width: 320px; background: #064E3B; border: 2px solid #10B981; border-radius: 10px; padding: 14px;
+      text-align: center; color: #ECFDF5; font-size: 13.5px; font-weight: 700;
+    }
+
+    /* Right Inspector / Detail View */
+    .inspector-panel {
+      width: 440px; background: #111827; border-left: 1px solid #1F2937; padding: 32px;
+      overflow-y: auto; display: flex; flex-direction: column;
+    }
+    .panel-header { border-bottom: 1px solid #374151; padding-bottom: 16px; margin-bottom: 20px; }
+    .panel-badge {
+      display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;
+      background: #38BDF8; color: #0F172A; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .panel-title { font-size: 20px; font-weight: 700; color: #FFFFFF; }
+    .panel-subtitle { font-size: 13px; color: #9CA3AF; margin-top: 4px; }
+
+    .sec-title { font-size: 11.5px; font-weight: 700; color: #38BDF8; text-transform: uppercase; letter-spacing: 0.8px; margin: 18px 0 8px 0; }
+    .info-card {
+      background: #1F2937; border-radius: 8px; padding: 14px; font-size: 13px; color: #D1D5DB; line-height: 1.6; border: 1px solid #374151;
+    }
+    .metrics-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 4px; }
+    .metrics-table td { padding: 6px 0; border-bottom: 1px solid #2D3748; }
+    .metrics-table td.val { text-align: right; font-weight: 700; color: #38BDF8; }
+
+    .hint-click { font-size: 10.5px; color: #38BDF8; font-weight: 600; text-transform: none; }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT: EXACT VERTICAL FLOWCHART COLUMN -->
+  <div class="flowchart-container">
+    <div class="flowchart-title">
+      <h1>FarmWise360-AI System Architecture</h1>
+      <p>Click on any stage block to view its full working explanation & parameters.</p>
+    </div>
+
+    <!-- STAGE 1 -->
+    <div class="block-card" onclick="selectStage(1)" id="stage-1">
+      <div class="card-header tag-blue">
+        <span>STAGE 1: DATASET PREPARATION &amp; INGESTION</span>
+        <span class="hint-click">Click to inspect →</span>
+      </div>
+      <div class="step-item">Agricultural PDFs (ICAR / TNAU)</div>
+      <div class="flow-arrow" style="height:18px;">↓</div>
+      <div class="step-item">Text Cleaning + OCR Error Removal</div>
+      <div class="flow-arrow" style="height:18px;">↓</div>
+      <div class="step-item">Semantic Chunking</div>
+      <div class="flow-arrow" style="height:18px;">↓</div>
+      <div class="step-item">BPE Tokenizer (4,000 Vocabulary)<br><small style="color:#94A3B8;">Corpus: Tomato | Wheat | Rice</small></div>
+    </div>
+
+    <div class="flow-arrow">↓</div>
+
+    <!-- STAGE 2 -->
+    <div class="block-card" onclick="selectStage(2)" id="stage-2">
+      <div class="card-header tag-purple">
+        <span>STAGE 2: CUSTOM DECODER-ONLY TRANSFORMER</span>
+        <span class="hint-click">Click to inspect →</span>
+      </div>
+      <div style="font-weight:600; font-size:13px; color:#E2E8F0; margin-bottom:8px;">PyTorch Model:</div>
+      <ul class="step-list">
+        <li>4 Transformer Layers</li>
+        <li>4 Attention Heads</li>
+        <li>d_model = 128 | d_ff = 512</li>
+        <li>Crop Classification Head</li>
+        <li>Pathology Classification Head</li>
+        <li>Severity Classification Head</li>
+        <li><strong>Reported:</strong> 937,728 Transformer parameters / 963,666 including classifier heads</li>
+      </ul>
+    </div>
+
+    <div class="flow-arrow">↓</div>
+
+    <!-- STAGE 3 -->
+    <div class="block-card" onclick="selectStage(3)" id="stage-3">
+      <div class="card-header tag-green">
+        <span>STAGE 3: MODEL TRAINING &amp; VALIDATION</span>
+        <span class="hint-click">Click to inspect →</span>
+      </div>
+      <div class="step-item">Prepared &amp; Tokenized Dataset</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      <div class="step-item">Training Batches</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      
+      <div style="background:#0F172A; border:1px solid #1E3A5F; border-radius:8px; padding:10px; margin:4px 0;">
+        <div style="font-weight:700; color:#38BDF8; font-size:12px; text-align:center;">FORWARD PASS (Decoder Transformer)</div>
+        <div style="font-size:12px; color:#CBD5E1; text-align:center; margin-top:2px;">• Next-Token Prediction &nbsp;• Crop / Pathology / Severity</div>
+      </div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+
+      <div class="step-item">LOSS CALCULATION (LM Loss + Diagnostic Loss)</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      <div class="step-item">BACKPROPAGATION (Calculate Gradients)</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      <div class="step-item">WEIGHT UPDATE (AdamW | LR = 3e-4 | Cosine Decay)</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      <div class="step-item">VALIDATION (Loss, Perplexity, Metrics) → Checkpoint</div>
+    </div>
+
+    <div class="flow-arrow">↓</div>
+
+    <!-- STAGE 4 -->
+    <div class="block-card" onclick="selectStage(4)" id="stage-4">
+      <div class="card-header tag-orange">
+        <span>STAGE 4: BASELINE EVALUATION</span>
+        <span class="hint-click">Click to inspect →</span>
+      </div>
+      <div style="font-weight:600; font-size:13px; color:#E2E8F0; margin-bottom:8px;">FP32 Reference Model:</div>
+      <ul class="step-list">
+        <li>CPU Latency: 3.01 ms (reported)</li>
+        <li>RAM: ~65 MB (reported)</li>
+        <li>Throughput: ~332 requests/s (reported)</li>
+        <li>Baseline Model Size &amp; Accuracy Benchmark</li>
+      </ul>
+    </div>
+
+    <div class="flow-arrow">↓</div>
+
+    <!-- STAGE 5 -->
+    <div class="block-card" onclick="selectStage(5)" id="stage-5">
+      <div class="card-header tag-red">
+        <span>STAGE 5: MODEL OPTIMIZATION</span>
+        <span class="hint-click">Click to inspect →</span>
+      </div>
+      <ul class="step-list">
+        <li>INT8 Quantization</li>
+        <li>Structured Pruning</li>
+        <li>Knowledge Distillation</li>
+        <li>Architecture Optimization</li>
+        <li>Semantic Document Index</li>
+      </ul>
+      <div style="margin-top:12px; background:#450A0A; border:1px solid #DC2626; border-radius:6px; padding:8px 12px; font-size:12px; color:#FECACA; text-align:center;">
+        <strong>Target:</strong> ≥50% Compression | Model &lt;4 MB<br>
+        <strong>Reported Compression:</strong> 78% achieved
+      </div>
+    </div>
+
+    <div class="flow-arrow">↓</div>
+
+    <!-- STAGE 6 -->
+    <div class="block-card" onclick="selectStage(6)" id="stage-6">
+      <div class="card-header tag-cyan">
+        <span>STAGE 6: MASTER–SLAVE ROUTING</span>
+        <span class="hint-click">Click to inspect →</span>
+      </div>
+      <div class="step-item">User Input: Text / Voice / Crop Image</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      <div class="step-item">Local Model Inference &nbsp;→&nbsp; Confidence Evaluation</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      
+      <!-- Decision Box -->
+      <div style="background:#1E293B; border:1px solid #F59E0B; border-radius:8px; padding:10px; text-align:center; font-weight:700; color:#FBBF24; font-size:12.5px;">
+        ◇ Confidence ≥ 70%? ◇
+      </div>
+
+      <div class="decision-row">
+        <div class="decision-branch branch-yes">
+          <strong>YES (≥ 70%)</strong><br>
+          <span style="font-size:11px; margin-top:4px; display:inline-block;">LOCAL RESPONSE<br>(Offline Instant 3ms)</span>
+        </div>
+        <div class="decision-branch branch-no">
+          <strong>NO (&lt; 70%)</strong><br>
+          <span style="font-size:11px; margin-top:4px; display:inline-block;">CLOUD MASTER LLM<br>Verified PDF Retrieval<br>Safety / Legal Gate<br>Agronomist Review*</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">↓</div>
+
+    <!-- STAGE 7 -->
+    <div class="block-card" onclick="selectStage(7)" id="stage-7">
+      <div class="card-header tag-emerald">
+        <span>STAGE 7: RESPONSE GENERATION &amp; SAFETY</span>
+        <span class="hint-click">Click to inspect →</span>
+      </div>
+      <div class="step-item">Evidence-Grounded Answer</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      <div class="step-item">Banned-Chemical + Dosage Checks</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      <div class="step-item">PHI Verification + Legal Disclaimer</div>
+      <div class="flow-arrow" style="height:16px;">↓</div>
+      <div class="step-item">Regional-Language Text / Voice Output</div>
+    </div>
+
+    <div class="flow-arrow">↓</div>
+
+    <!-- FINAL OUTPUT BADGE -->
+    <div class="final-badge">
+      FINAL OUTPUT<br>
+      <span style="font-size:12px; font-weight:normal; color:#A7F3D0;">Safe Agricultural Guidance for Farmers</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: CLICK-TO-EXPLAIN INSPECTOR PANEL -->
+  <div class="inspector-panel" id="inspector-panel">
+    <div class="panel-header">
+      <span class="panel-badge" id="p-badge">STAGE 1</span>
+      <div class="panel-title" id="p-title">Dataset Preparation &amp; Ingestion</div>
+      <div class="panel-subtitle" id="p-sub">Agricultural Knowledge Curation Pipeline</div>
+    </div>
+
+    <div class="sec-title">What Happens in this Stage</div>
+    <div class="info-card" id="p-what">
+      Extracts, cleans, and standardizes authoritative agricultural documents (ICAR research papers, TNAU advisories) instead of using unverified noisy CSV datasets.
+    </div>
+
+    <div class="sec-title">Technical Working Mechanism</div>
+    <div class="info-card" id="p-how">
+      1. OCR Noise Removal: Filters broken text, header lines, and page numbers from PDFs.<br>
+      2. Semantic Chunking: Divides text into self-contained advice blocks tagged with crop and disease labels.<br>
+      3. BPE Tokenizer: 4,000-vocabulary model preserving scientific chemical names as single tokens.
+    </div>
+
+    <div class="sec-title">Specifications &amp; Verified Metrics</div>
+    <div class="info-card">
+      <table class="metrics-table" id="p-table">
+        <tr><td>Tokenizer Type</td><td class="val">Custom BPE (4,000 vocab)</td></tr>
+        <tr><td>Ingested Crops</td><td class="val">Tomato, Wheat, Rice</td></tr>
+        <tr><td>Artifact Location</td><td class="val">dataset/tokenized/*.json</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const stageDetails = {
+      1: {
+        badge: "STAGE 1",
+        title: "Dataset Preparation & Ingestion",
+        sub: "Authoritative Agricultural Knowledge Ingestion",
+        what: "Transforms raw, multi-page agricultural research PDFs (ICAR, state universities) into clean, tokenized data chunks ready for neural processing with zero reliance on noisy CSV datasets.",
+        how: "• Extracts text using PyPDF while stripping OCR artifacts, headers, and footnotes.<br>• Splits paragraphs into semantic chunks with crop, pathology, and pesticide metadata.<br>• Trains a custom 4,000-vocabulary Byte-Pair Encoding (BPE) tokenizer to keep agricultural words (Mancozeb, Chlorpyrifos) intact.",
+        table: [
+          ["Vocabulary Size", "4,000 Tokens (Custom BPE)"],
+          ["Curated Corpora", "Tomato, Wheat, Rice Advisories"],
+          ["Artifact", "dataset/tokenized/farmwise_bpe_tokenizer.json"]
+        ]
+      },
+      2: {
+        badge: "STAGE 2",
+        title: "Custom Decoder-Only Transformer",
+        sub: "Sub-1M Parameter Neural Network Engine",
+        what: "The central diagnostic 'brain' of the Slave Model, engineered specifically to execute on standard low-cost Android phone CPUs without needing cloud servers or GPUs.",
+        how: "• Built in PyTorch using 4 stacked Transformer blocks.<br>• 4 Multi-Head Self-Attention heads with d_model=128 and d_ff=512.<br>• Houses multi-task projection heads directly predicting Crop, Disease Condition, and Severity Rating.<br>• Verified footprint: 937,728 transformer parameters (963,666 total with heads).",
+        table: [
+          ["Transformer Parameters", "937,728 params (Strictly &lt;1M)"],
+          ["Classifier Total Params", "963,666 params"],
+          ["Target Hardware", "Single-Core Mobile CPU"],
+          ["Code Reference", "model/transformer.py, model/diagnostic_model.py"]
+        ]
+      },
+      3: {
+        badge: "STAGE 3",
+        title: "Model Training & Validation",
+        sub: "Causal LM Loss + Multi-Task Diagnostic Backpropagation",
+        what: "Executes the iterative training loop on tokenized agricultural batches to optimize both language understanding and disease diagnostic accuracy.",
+        how: "• Forward Pass: Computes next-token prediction and classification logits for crop, disease, and severity.<br>• Loss Calculation: Joint multi-task cross-entropy loss.<br>• Optimization: AdamW optimizer (learning rate 3e-4) paired with a cosine learning rate scheduler.<br>• Checkpointing: Saves the model checkpoint with the lowest validation loss.",
+        table: [
+          ["Optimizer", "AdamW (LR = 3e-4, Weight Decay = 0.01)"],
+          ["Schedule", "Cosine Annealing"],
+          ["Loss Formulation", "Loss_total = Loss_LM + Loss_Diagnostic"],
+          ["Code Reference", "model/train.py"]
+        ]
+      },
+      4: {
+        badge: "STAGE 4",
+        title: "Baseline Evaluation",
+        sub: "100% Normalized Reference Profiling",
+        what: "Measures the raw, uncompressed FP32 model before applying any compression to establish the baseline standard.",
+        how: "• Profiles execution on single-core standard CPU hardware.<br>• Measures inference latency, RAM footprint, FLOPs, and throughput.<br>• Sets the reference line that the optimization phase must beat by ≥50%.",
+        table: [
+          ["CPU Latency", "3.01 ms (mean), 4.08 ms (P95)"],
+          ["Memory (RAM)", "~65 MB during inference"],
+          ["Throughput", "~332 requests / second"],
+          ["Benchmark Tool", "experiments/benchmark_structured.py"]
+        ]
+      },
+      5: {
+        badge: "STAGE 5",
+        title: "Model Optimization (R&D)",
+        sub: "Lightweight Compression & Quantization",
+        what: "Compresses the model to reduce memory, file size, and latency while strictly preserving diagnostic accuracy.",
+        how: "• Post-training INT8 quantization to compress weight matrices.<br>• Structured pruning of redundant attention heads.<br>• Knowledge Distillation: Using cloud Master LLM soft probabilities to train the compact Slave.<br>• Pure-Python TF-IDF & N-gram semantic index for instant offline lookups without external vector databases.",
+        table: [
+          ["Target Reduction", "≥ 50% Reduction"],
+          ["Achieved Compression", "78% (Model file &lt; 4 MB)"],
+          ["Quantization Type", "PyTorch INT8 Dynamic Quantization"],
+          ["Vector DB Requirement", "Zero (Pure Python Semantic Index)"]
+        ]
+      },
+      6: {
+        badge: "STAGE 6",
+        title: "Master–Slave Routing",
+        sub: "Edge Triage & Cloud Escalation Hub",
+        what: "Routes incoming farmer questions through a two-tier hybrid architecture: instant offline phone diagnosis or deep cloud reasoning.",
+        how: "1. The farmer submits a symptom query (text, voice, or image).<br>2. Local Slave Model computes the diagnosis in ~3 ms and calculates a confidence score.<br>3. <b>Decision Gate:</b> If Confidence ≥ 70%, the answer is delivered immediately on-device.<br>4. If Confidence &lt; 70%, the query is queued and sent to the Master Cloud LLM, where certified agronomists inspect the case before returning a verified answer.",
+        table: [
+          ["Edge Execution Time", "3.01 ms (100% Offline)"],
+          ["Confidence Threshold", "70% Cutoff"],
+          ["Cloud Escalation Path", "Master LLM + Human Agronomist Review"]
+        ]
+      },
+      7: {
+        badge: "STAGE 7",
+        title: "Response Generation & Safety",
+        sub: "4-Gate Zero-Hallucination Framework",
+        what: "Guarantees that every agricultural recommendation reaching the farmer is 100% safe, verified, and legally compliant.",
+        how: "• <b>Gate 1 (Banned Chemical Filter):</b> Prohibits any blacklisted pesticides.<br>• <b>Gate 2 (Dosage Calibration):</b> Dosages are copied verbatim from verified research PDFs, never hallucinated.<br>• <b>Gate 3 (PHI Verification):</b> Checks Pre-Harvest Interval days to ensure food safety.<br>• <b>Gate 4 (Legal Disclaimer):</b> Wraps advice with mandatory legal caveats and outputs localized text/audio.",
+        table: [
+          ["Chemical Hallucination Rate", "0% (Verbatim Document Lookups)"],
+          ["Safety Gates", "4 Mandatory Sequential Filters"],
+          ["Output Formats", "Regional Native Text + Voice Readout"]
+        ]
+      }
+    };
+
+    function selectStage(num) {
+      document.querySelectorAll('.block-card').forEach(b => b.classList.remove('active'));
+      const active = document.getElementById('stage-' + num);
+      if (active) active.classList.add('active');
+
+      const data = stageDetails[num];
+      document.getElementById('p-badge').innerText = data.badge;
+      document.getElementById('p-title').innerText = data.title;
+      document.getElementById('p-sub').innerText = data.sub;
+      document.getElementById('p-what').innerHTML = data.what;
+      document.getElementById('p-how').innerHTML = data.how;
+
+      let tblHtml = "";
+      data.table.forEach(row => {
+        tblHtml += `<tr><td>${row[0]}</td><td class="val">${row[1]}</td></tr>`;
+      });
+      document.getElementById('p-table').innerHTML = tblHtml;
+    }
+
+    // Default select Stage 1
+    selectStage(1);
+  </script>
+</body>
+</html>
+
