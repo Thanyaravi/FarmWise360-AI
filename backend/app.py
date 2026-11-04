@@ -22,12 +22,13 @@ from model.config import ModelConfig
 from model.diagnostic_model import FarmWiseDiagnosticClassifier
 from model.knowledge_base import AgriculturalKnowledgeBase
 from model.context_advisory import ContextAdvisoryEngine
+from model.master_model import FarmWiseMasterModel
 
 
 app = FastAPI(
-    title="FarmWise 360 AI - Edge Diagnostic Engine",
-    description="Context-aware zero-hallucination agricultural diagnostic & advisory API.",
-    version="2.1.0",
+    title="FarmWise 360 AI - Edge & Master Diagnostic Engine",
+    description="Context-aware zero-hallucination agricultural diagnostic & Qwen-powered Master Chatbot API.",
+    version="2.2.0",
 )
 
 app.add_middleware(
@@ -38,12 +39,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global model, knowledge base, and semantic context engine
+# Global models: Slave edge classifier + Master conversational engine
 config = ModelConfig()
 knowledge_base = AgriculturalKnowledgeBase()
 model = FarmWiseDiagnosticClassifier(config, knowledge_base=knowledge_base)
 model.eval()
 context_engine = ContextAdvisoryEngine(config=config)
+master_model = FarmWiseMasterModel(load_llm=False)  # Lazy/fast load for responsive service startup
 
 
 class DiagnosisRequest(BaseModel):
@@ -53,6 +55,11 @@ class DiagnosisRequest(BaseModel):
 
 class AskRequest(BaseModel):
     question: str = Field(..., description="Natural language question in farmer's own words")
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(..., description="Farmer conversational message or multi-turn query")
+    history: Optional[List[dict]] = Field(None, description="Previous conversation turns [{'role': 'user'|'assistant', 'content': '...'}]")
 
 
 class SearchRequest(BaseModel):
@@ -122,6 +129,23 @@ def answer_farmer_question(request: AskRequest):
         return context_engine.answer_query(request.question)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
+
+
+@app.post("/chat")
+def chat_with_master_model(request: ChatRequest):
+    """
+    Conversational Chatbot Endpoint powered by Qwen Master Model & PDF RAG Grounding.
+    Handles follow-up questions, conversational nuances, and multi-turn dialogue.
+    """
+    if not request.message.strip():
+        raise HTTPException(status_code=400, detail="Message cannot be empty.")
+    try:
+        return master_model.chat(
+            query=request.message,
+            conversation_history=request.history,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Master Model Chat error: {str(e)}")
 
 
 @app.post("/advisory/search")
